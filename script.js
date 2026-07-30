@@ -36,12 +36,19 @@
   const elements = {
     endingScreen: document.getElementById("endingScreen"),
     endingBackground: document.getElementById("endingBackground"),
+    backgroundShade: document.querySelector(".background-shade"),
+    mists: document.querySelectorAll(".mist"),
+    particles: document.getElementById("particles"),
     endingTitle: document.getElementById("endingTitle"),
+    lettersBlock: document.getElementById("lettersBlock"),
     letterCount: document.getElementById("letterCount"),
+    lettersMessage: document.getElementById("lettersMessage"),
+    endingActions: document.getElementById("endingActions"),
     wallpaperButton: document.getElementById("wallpaperButton"),
     wallpaperScreen: document.getElementById("wallpaperScreen"),
+    wallpaperPreview: document.getElementById("wallpaperPreview"),
     wallpaperBackButton: document.getElementById("wallpaperBackButton"),
-    particles: document.getElementById("particles")
+    wallpaperControls: document.querySelector(".wallpaper-controls")
   };
 
   function normaliseName(value) {
@@ -56,10 +63,10 @@
     if (value === true || value === 1) return true;
 
     const normalised = normaliseName(value);
+
     return [
       "completed",
       "complete",
-      "active",
       "true",
       "1",
       "done"
@@ -69,13 +76,13 @@
   function setEnding(rawEnding) {
     const endingName = normaliseName(rawEnding);
 
-    if (!CONFIG.endings[endingName]) {
-      return;
-    }
+    if (!CONFIG.endings[endingName]) return;
 
     state.ending = endingName;
+
     const ending = CONFIG.endings[endingName];
 
+    document.body.setAttribute("data-ending", endingName);
     elements.endingTitle.textContent = ending.title;
     elements.endingBackground.style.backgroundImage = `url("${ending.artwork}")`;
     document.title = `The Doll Maker — ${ending.title}`;
@@ -87,35 +94,6 @@
     }
 
     return Math.max(0, Math.min(6, state.letters.size));
-  }
-
-  function renderLetterCount(animate = true) {
-    const target = getLetterTotal();
-    const start = animate ? 0 : target;
-    const duration = 760;
-    const startedAt = performance.now();
-
-    if (!animate) {
-      elements.letterCount.textContent = `${target} / 6`;
-      updateWallpaperUnlock(target);
-      return;
-    }
-
-    function tick(now) {
-      const progress = Math.min(1, (now - startedAt) / duration);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const value = Math.round(start + (target - start) * eased);
-
-      elements.letterCount.textContent = `${value} / 6`;
-
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        updateWallpaperUnlock(target);
-      }
-    }
-
-    requestAnimationFrame(tick);
   }
 
   function updateWallpaperUnlock(total) {
@@ -135,7 +113,6 @@
     ) {
       state.numericLetterCount = null;
       state.letters.add(normalisedTask);
-      renderLetterCount(false);
     }
   }
 
@@ -204,7 +181,6 @@
         0,
         Math.min(6, Math.round(Number(directLetterCount)))
       );
-      renderLetterCount(false);
     }
 
     parseTaskCollection(data.tasks ?? data.taskStates ?? data.completedTasks);
@@ -241,26 +217,106 @@
   }
 
   function createParticles() {
-    const particleCount = 24;
+    const particleCount = 34;
 
     for (let index = 0; index < particleCount; index += 1) {
       const particle = document.createElement("span");
       particle.className = "particle";
 
       particle.style.left = `${Math.random() * 100}%`;
-      particle.style.top = `${55 + Math.random() * 50}%`;
-      particle.style.opacity = `${0.12 + Math.random() * 0.3}`;
-      particle.style.animationDuration = `${10 + Math.random() * 15}s`;
-      particle.style.animationDelay = `${-Math.random() * 18}s`;
-      particle.style.transform = `scale(${0.6 + Math.random() * 1.5})`;
+      particle.style.top = `${58 + Math.random() * 45}%`;
+      particle.style.opacity = `${0.14 + Math.random() * 0.38}`;
+      particle.style.animationDuration = `${9 + Math.random() * 13}s`;
+      particle.style.animationDelay = `${-Math.random() * 20}s`;
+      particle.style.transform = `scale(${0.6 + Math.random() * 1.8})`;
 
       elements.particles.appendChild(particle);
     }
   }
 
+  function wait(ms) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function animateLetterCount(target) {
+    return new Promise((resolve) => {
+      const duration = 1500;
+      const startedAt = performance.now();
+
+      function tick(now) {
+        const progress = Math.min(1, (now - startedAt) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = Math.round(target * eased);
+
+        elements.letterCount.textContent = `${value} / 6`;
+
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          elements.letterCount.textContent = `${target} / 6`;
+          resolve();
+        }
+      }
+
+      requestAnimationFrame(tick);
+    });
+  }
+
+  async function runSequence() {
+    const totalLetters = getLetterTotal();
+
+    updateWallpaperUnlock(totalLetters);
+    elements.letterCount.textContent = "0 / 6";
+    elements.lettersMessage.classList.remove("is-visible");
+    elements.lettersMessage.textContent =
+      "Congratulations — You Collected All of Angelica’s Letters";
+
+    await wait(250);
+
+    elements.endingBackground.classList.add("is-visible");
+    elements.backgroundShade.classList.add("is-visible");
+    elements.mists.forEach((mist) => mist.classList.add("is-visible"));
+    elements.particles.classList.add("is-visible");
+
+    await wait(1650);
+
+    elements.endingTitle.classList.add("is-visible");
+
+    await wait(1350);
+
+    elements.lettersBlock.classList.add("is-visible");
+
+    await wait(650);
+
+    await animateLetterCount(totalLetters);
+
+    if (totalLetters === 6) {
+      await wait(450);
+      elements.lettersMessage.classList.add("is-visible");
+      await wait(1550);
+    } else {
+      await wait(650);
+    }
+
+    elements.endingActions.classList.add("is-visible");
+  }
+
   function showWallpaper() {
     elements.wallpaperScreen.hidden = false;
     elements.endingScreen.setAttribute("aria-hidden", "true");
+
+    elements.wallpaperPreview.classList.remove("is-focused");
+    elements.wallpaperControls.classList.remove("is-visible");
+
+    window.setTimeout(() => {
+      elements.wallpaperPreview.classList.add("is-focused");
+    }, 80);
+
+    window.setTimeout(() => {
+      elements.wallpaperControls.classList.add("is-visible");
+    }, 900);
   }
 
   function hideWallpaper() {
@@ -272,14 +328,6 @@
     handleIncomingData(event.data);
   });
 
-  /*
-    Portals can also call this function directly from the iframe context:
-
-    window.DollMakerEnding.update({
-      ending: "exit stitch",
-      letters: 6
-    });
-  */
   window.DollMakerEnding = {
     update: handleIncomingData,
     setEnding,
@@ -292,8 +340,5 @@
   readPreviewQueryParameters();
   setEnding(state.ending);
   createParticles();
-
-  window.setTimeout(() => {
-    renderLetterCount(true);
-  }, 2750);
+  runSequence();
 })();
