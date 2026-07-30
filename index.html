@@ -5,21 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#020203" />
   <title>The Doll Maker — Ending</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
-<body>
+<body data-ending="exit solo">
   <main id="endingScreen" class="ending-screen" aria-live="polite">
     <div id="endingBackground" class="ending-background"></div>
     <div class="background-shade"></div>
+
     <div class="mist mist-one"></div>
     <div class="mist mist-two"></div>
+    <div class="mist mist-three"></div>
+
     <div id="particles" class="particles" aria-hidden="true"></div>
 
     <section class="ending-content">
       <h1 id="endingTitle" class="ending-title">LEFT BEHIND</h1>
 
-      <div class="letters-block">
+      <div id="lettersBlock" class="letters-block">
         <p class="letters-label">ANGELICA'S LETTERS</p>
+
         <div class="letters-counter">
           <img
             class="letter-icon"
@@ -29,9 +33,13 @@
           />
           <span id="letterCount">0 / 6</span>
         </div>
+
+        <p id="lettersMessage" class="letters-message">
+          Congratulations — You Collected All of Angelica’s Letters
+        </p>
       </div>
 
-      <nav class="ending-actions" aria-label="Ending options">
+      <nav id="endingActions" class="ending-actions" aria-label="Ending options">
         <button class="ending-button is-disabled" type="button" disabled>
           CREDITS
         </button>
@@ -53,12 +61,14 @@
   </main>
 
   <section id="wallpaperScreen" class="wallpaper-screen" hidden>
-    <div class="wallpaper-stage">
-      <img
-        id="wallpaperPreview"
-        src="assets/bonus_wallpaper.png"
-        alt="The Doll Maker bonus wallpaper"
-      />
+    <div class="wallpaper-layout">
+      <div class="wallpaper-image-wrap">
+        <img
+          id="wallpaperPreview"
+          src="assets/bonus_wallpaper.png"
+          alt="The Doll Maker bonus wallpaper"
+        />
+      </div>
 
       <div class="wallpaper-controls">
         <a
@@ -76,6 +86,6 @@
     </div>
   </section>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=2"></script>
 </body>
 </html>
