@@ -1,0 +1,410 @@
+@font-face {
+  font-family: "DollMaker";
+  src: url("assets/fonts/dollmakerfont.otf") format("opentype");
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --text: #eee9df;
+  --muted: rgba(238, 233, 223, 0.64);
+  --line: rgba(238, 233, 223, 0.24);
+  --glow: rgba(214, 224, 255, 0.24);
+  --black: #020203;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--black);
+}
+
+body {
+  font-family: "DollMaker", Georgia, serif;
+  color: var(--text);
+}
+
+button,
+a {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.ending-screen,
+.wallpaper-screen {
+  position: fixed;
+  inset: 0;
+  isolation: isolate;
+  background: #000;
+}
+
+.ending-screen {
+  opacity: 0;
+  animation: screenFadeIn 1.25s ease forwards;
+}
+
+.ending-background,
+.background-shade,
+.mist,
+.particles {
+  position: absolute;
+  inset: 0;
+}
+
+.ending-background {
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.035);
+  filter: brightness(0.7) saturate(0.78) contrast(1.08);
+  animation:
+    backgroundReveal 2.2s ease forwards,
+    slowPush 26s ease-in-out infinite alternate;
+}
+
+.background-shade {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 43%, transparent 0 24%, rgba(0, 0, 0, 0.18) 55%, rgba(0, 0, 0, 0.78) 100%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent 35%, rgba(0, 0, 0, 0.54));
+  box-shadow: inset 0 0 13vw rgba(0, 0, 0, 0.82);
+}
+
+.mist {
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.14;
+  mix-blend-mode: screen;
+  filter: blur(38px);
+  background:
+    radial-gradient(ellipse at 25% 72%, rgba(184, 196, 210, 0.42), transparent 38%),
+    radial-gradient(ellipse at 76% 78%, rgba(168, 181, 199, 0.34), transparent 40%);
+}
+
+.mist-one {
+  animation: mistDriftOne 17s ease-in-out infinite alternate;
+}
+
+.mist-two {
+  transform: scaleX(-1);
+  opacity: 0.09;
+  animation: mistDriftTwo 22s ease-in-out infinite alternate;
+}
+
+.particles {
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(236, 239, 242, 0.34);
+  box-shadow: 0 0 8px rgba(218, 228, 242, 0.2);
+  animation: particleFloat linear infinite;
+}
+
+.ending-content {
+  position: relative;
+  z-index: 4;
+  width: min(92vw, 1100px);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(34px, 5.4vh, 72px) 24px clamp(28px, 5vh, 58px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.ending-title {
+  margin: clamp(42px, 8vh, 112px) 0 0;
+  font-size: clamp(3rem, 7.6vw, 8.4rem);
+  line-height: 0.92;
+  font-weight: 400;
+  letter-spacing: 0.035em;
+  text-shadow:
+    0 3px 4px rgba(0, 0, 0, 0.9),
+    0 0 30px rgba(215, 226, 245, 0.16);
+  opacity: 0;
+  transform: translateY(12px);
+  animation: titleReveal 1.2s 1.75s ease forwards;
+}
+
+.letters-block {
+  margin-top: auto;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: contentReveal 0.9s 2.8s ease forwards;
+}
+
+.letters-label {
+  margin: 0 0 7px;
+  color: var(--muted);
+  font-family: Georgia, serif;
+  font-size: clamp(0.72rem, 1.15vw, 0.96rem);
+  letter-spacing: 0.24em;
+}
+
+.letters-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-family: Georgia, serif;
+  font-size: clamp(1.2rem, 2vw, 1.65rem);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+}
+
+.letter-icon {
+  width: clamp(28px, 3vw, 40px);
+  height: auto;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.72));
+}
+
+.ending-actions {
+  width: min(92vw, 860px);
+  margin-top: clamp(22px, 3.3vh, 42px);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: contentReveal 0.9s 3.65s ease forwards;
+}
+
+.ending-button {
+  min-width: 170px;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(3, 4, 6, 0.44);
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  box-shadow:
+    inset 0 0 18px rgba(255, 255, 255, 0.018),
+    0 8px 30px rgba(0, 0, 0, 0.18);
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    color 180ms ease;
+}
+
+.ending-button:hover:not(:disabled),
+.ending-button:focus-visible:not(:disabled) {
+  border-color: rgba(238, 233, 223, 0.58);
+  background: rgba(14, 17, 22, 0.62);
+  box-shadow:
+    0 0 24px var(--glow),
+    inset 0 0 18px rgba(255, 255, 255, 0.025);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.shop-button {
+  flex-direction: column;
+  line-height: 1;
+}
+
+.shop-button small {
+  color: rgba(238, 233, 223, 0.43);
+  font-family: Georgia, serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.17em;
+}
+
+.is-disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+
+.bonus-button {
+  width: 100%;
+  max-width: 352px;
+  margin-top: 2px;
+  border-color: rgba(225, 210, 167, 0.4);
+  animation: bonusReveal 1s ease both;
+}
+
+.wallpaper-screen {
+  z-index: 20;
+  padding: clamp(14px, 2vw, 28px);
+  opacity: 0;
+  animation: screenFadeIn 0.65s ease forwards;
+}
+
+.wallpaper-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #000;
+}
+
+.wallpaper-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 9vw rgba(0, 0, 0, 0.75);
+}
+
+#wallpaperPreview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: blur(14px) brightness(0.72);
+  transform: scale(1.018);
+  animation: wallpaperFocus 1.35s 0.18s ease forwards;
+}
+
+.wallpaper-controls {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: clamp(18px, 3.8vh, 46px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  opacity: 0;
+  animation: contentReveal 0.7s 1.25s ease forwards;
+}
+
+@keyframes screenFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes backgroundReveal {
+  from {
+    opacity: 0;
+    filter: brightness(0.2) saturate(0.45) contrast(1.15);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(0.7) saturate(0.78) contrast(1.08);
+  }
+}
+
+@keyframes slowPush {
+  from { transform: scale(1.035); }
+  to { transform: scale(1.055); }
+}
+
+@keyframes titleReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes contentReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bonusReveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mistDriftOne {
+  from { transform: translate3d(-3%, 1%, 0) scale(1.04); }
+  to { transform: translate3d(4%, -1%, 0) scale(1.09); }
+}
+
+@keyframes mistDriftTwo {
+  from { transform: translate3d(3%, 0, 0) scaleX(-1) scale(1.03); }
+  to { transform: translate3d(-4%, 1%, 0) scaleX(-1) scale(1.1); }
+}
+
+@keyframes particleFloat {
+  from {
+    transform: translate3d(0, 24px, 0);
+    opacity: 0;
+  }
+  12% { opacity: 0.6; }
+  82% { opacity: 0.28; }
+  to {
+    transform: translate3d(18px, -105vh, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes wallpaperFocus {
+  to {
+    filter: blur(0) brightness(1);
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 700px) {
+  .ending-content {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .ending-title {
+    margin-top: 12vh;
+    font-size: clamp(2.8rem, 13vw, 5.3rem);
+  }
+
+  .ending-actions {
+    gap: 9px;
+  }
+
+  .ending-button {
+    min-width: 142px;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+  }
+
+  .wallpaper-controls {
+    width: calc(100% - 24px);
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
