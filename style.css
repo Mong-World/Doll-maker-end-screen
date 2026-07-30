@@ -61,8 +61,8 @@ body[data-ending="exit solo"] {
   --tint-a: rgba(18, 25, 38, 0.17);
   --tint-b: rgba(1, 2, 5, 0.7);
 
-  --mist-color-a: rgba(105, 119, 143, 0.24);
-  --mist-color-b: rgba(52, 62, 78, 0.18);
+  --mist-color-a: rgba(18, 22, 29, 0.42);
+  --mist-color-b: rgba(6, 8, 12, 0.34);
 
   --bg-pos: center 18%;
   --bg-scale-start: 1.05;
@@ -71,7 +71,7 @@ body[data-ending="exit solo"] {
   --bg-saturation: 0.73;
 
   --glow: rgba(174, 191, 216, 0.17);
-  --mist-opacity: 0.82;
+  --mist-opacity: 0.48;
 }
 
 body[data-ending="exit stitch"] {
@@ -269,8 +269,10 @@ body[data-ending="pendant ending"] .background-shade {
 }
 
 body[data-ending="exit solo"] .mist {
-  mix-blend-mode: screen;
-  filter: blur(34px);
+  mix-blend-mode: normal;
+  filter: blur(42px);
+  transform: translateY(16%);
+  opacity: 0.48;
 }
 
 body[data-ending="pendant ending"] .mist {
