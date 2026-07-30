@@ -58,20 +58,20 @@ a {
 ========================================================= */
 
 body[data-ending="exit solo"] {
-  --tint-a: rgba(5, 8, 14, 0.28);
-  --tint-b: rgba(0, 0, 0, 0.92);
+  --tint-a: rgba(18, 25, 38, 0.17);
+  --tint-b: rgba(1, 2, 5, 0.7);
 
-  --mist-color-a: rgba(5, 6, 9, 0.9);
-  --mist-color-b: rgba(0, 0, 0, 0.78);
+  --mist-color-a: rgba(105, 119, 143, 0.24);
+  --mist-color-b: rgba(52, 62, 78, 0.18);
 
   --bg-pos: center 18%;
   --bg-scale-start: 1.05;
   --bg-scale-end: 1.08;
-  --bg-brightness: 0.57;
-  --bg-saturation: 0.64;
+  --bg-brightness: 0.7;
+  --bg-saturation: 0.73;
 
-  --glow: rgba(145, 160, 184, 0.12);
-  --mist-opacity: 1;
+  --glow: rgba(174, 191, 216, 0.17);
+  --mist-opacity: 0.82;
 }
 
 body[data-ending="exit stitch"] {
@@ -125,8 +125,6 @@ body[data-ending="pendant ending"] {
   inset: 0;
 }
 
-/* Background image */
-
 .ending-background {
   background-position: var(--bg-pos);
   background-size: cover;
@@ -155,8 +153,6 @@ body[data-ending="pendant ending"] {
     saturate(var(--bg-saturation))
     contrast(1.08);
 }
-
-/* Lighting and vignette */
 
 .background-shade {
   z-index: 1;
@@ -192,8 +188,6 @@ body[data-ending="pendant ending"] {
 .background-shade.is-visible {
   opacity: 1;
 }
-
-/* Brighter, sunnier lighting for True Friendship */
 
 body[data-ending="pendant ending"] .background-shade {
   background:
@@ -274,17 +268,45 @@ body[data-ending="pendant ending"] .background-shade {
     mistDriftThree 22s ease-in-out infinite alternate;
 }
 
-/* Darker black fog for Left Behind */
-
 body[data-ending="exit solo"] .mist {
-  mix-blend-mode: multiply;
-  filter: blur(38px);
+  mix-blend-mode: screen;
+  filter: blur(34px);
 }
-
-/* No fog at all for True Friendship */
 
 body[data-ending="pendant ending"] .mist {
   display: none;
+}
+
+/* Light haze only behind text for True Friendship */
+
+body[data-ending="pendant ending"] .ending-content::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at 50% 19%,
+      rgba(218, 224, 226, 0.23),
+      transparent 31%
+    ),
+    radial-gradient(
+      ellipse at 50% 78%,
+      rgba(209, 218, 220, 0.3),
+      transparent 35%
+    );
+
+  filter: blur(24px);
+  opacity: 0;
+
+  transition:
+    opacity 1.5s ease;
+}
+
+body[data-ending="pendant ending"] .ending-content.has-text-fog::before {
+  opacity: 1;
 }
 
 /* =========================================================
@@ -327,8 +349,6 @@ body[data-ending="pendant ending"] .mist {
     var(--particle-delay, 0s),
     var(--twinkle-delay, 0s);
 }
-
-/* Warmer particles for True Friendship */
 
 body[data-ending="pendant ending"] .particle {
   background:
@@ -382,8 +402,6 @@ body[data-ending="pendant ending"] .particle {
   transform: translateY(0);
 }
 
-/* Ending title */
-
 .ending-title {
   margin:
     clamp(54px, 11vh, 130px)
@@ -401,8 +419,6 @@ body[data-ending="pendant ending"] .particle {
     0 4px 6px rgba(0, 0, 0, 0.9),
     0 0 36px var(--glow);
 }
-
-/* Angelica's letters */
 
 .letters-block {
   margin-top: auto;
@@ -456,8 +472,6 @@ body[data-ending="pendant ending"] .particle {
       0 2px 5px rgba(0, 0, 0, 0.72)
     );
 }
-
-/* Congratulations message */
 
 .letters-message {
   min-height: 1.5em;
