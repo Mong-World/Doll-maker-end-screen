@@ -5,15 +5,15 @@
     endings: {
       "exit solo": {
         title: "LEFT BEHIND",
-        artwork: "assets/ending_leftbehind.png"
+        artwork: "assets/ending_leftbehind.PNG"
       },
       "exit stitch": {
         title: "ESCAPED",
-        artwork: "assets/ending_escaped.png"
+        artwork: "assets/ending_escaped.PNG"
       },
       "pendant ending": {
         title: "TRUE FRIENDSHIP",
-        artwork: "assets/ending_truefriendship.png"
+        artwork: "assets/ending_truefriendship.PNG"
       }
     },
 
