@@ -549,11 +549,17 @@
 
     await wait(1150);
 
-    elements.endingTitle.classList.add(
-      "is-visible"
-    );
+   elements.endingTitle.classList.add(
+  "is-visible"
+);
 
-    await wait(850);
+if (state.ending === "pendant ending") {
+  document
+    .querySelector(".ending-content")
+    .classList.add("has-text-fog");
+}
+
+await wait(850);
 
     elements.lettersBlock.classList.add(
       "is-visible"
