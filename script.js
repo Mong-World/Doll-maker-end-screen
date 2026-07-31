@@ -782,155 +782,82 @@
       "MAIN MENU";
   }
 
-  function returnToMainMenu() {
-    const button =
-      elements.mainMenuButton;
-
-    if (!button) {
-      return;
-    }
-
-    button.disabled =
-      true;
-
-    button.textContent =
-      "RETURNING...";
-
-    if (
-      typeof PortalsSdk ===
-      "undefined"
-    ) {
-      console.error(
-        "PortalsSdk is unavailable."
-      );
-
-      button.textContent =
-        "SDK ERROR";
-
-      window.setTimeout(
-        resetMainMenuButton,
-        1800
-      );
-
-      return;
-    }
-
-    if (
-      typeof PortalsSdk
-        .sendMessageToUnity !==
-        "function"
-    ) {
-      console.error(
-        "sendMessageToUnity is unavailable."
-      );
-
-      button.textContent =
-        "SDK ERROR";
-
-      window.setTimeout(
-        resetMainMenuButton,
-        1800
-      );
-
-      return;
-    }
-
-    const activateMainMenuTask =
-      JSON.stringify({
-        TaskName:
-          CONFIG.returnTaskName,
-
-        TaskTargetState:
-          "SetNotActiveToActive",
-
-        Delay:
-          0
-      });
-
-    const resetEndScreenTask =
-      JSON.stringify({
-        TaskName:
-          CONFIG.endScreenTaskName,
-
-        TaskTargetState:
-          "SetActiveToNotActive",
-
-        Delay:
-          0.1
-      });
-
-    console.log(
-      "Activating return task:",
-      activateMainMenuTask
-    );
-
-    console.log(
-      "Resetting end screen task:",
-      resetEndScreenTask
-    );
-
-    try {
-      PortalsSdk.sendMessageToUnity(
-        activateMainMenuTask
-      );
-
-      PortalsSdk.sendMessageToUnity(
-        resetEndScreenTask
-      );
-    } catch (error) {
-      console.error(
-        "Failed to send Portals task messages:",
-        error
-      );
-
-      button.textContent =
-        "TASK ERROR";
-
-      window.setTimeout(
-        resetMainMenuButton,
-        1800
-      );
-
-      return;
-    }
-
-    window.setTimeout(() => {
-      if (
-        typeof PortalsSdk
-          .closeIframe ===
-          "function"
-      ) {
-        try {
-          PortalsSdk.closeIframe();
-        } catch (error) {
-          console.error(
-            "Failed to close iframe:",
-            error
-          );
-
-          button.textContent =
-            "CLOSE ERROR";
-
-          window.setTimeout(
-            resetMainMenuButton,
-            1800
-          );
-        }
-      } else {
-        console.error(
-          "closeIframe is unavailable."
-        );
-
-        button.textContent =
-          "CLOSE ERROR";
-
-        window.setTimeout(
-          resetMainMenuButton,
-          1800
-        );
-      }
-    }, 300);
+function resetMainMenuButton() {
+  if (!elements.mainMenuButton) {
+    return;
   }
+
+  elements.mainMenuButton.disabled = false;
+  elements.mainMenuButton.textContent = "MAIN MENU";
+}
+
+function returnToMainMenu() {
+  const button = elements.mainMenuButton;
+
+  if (!button) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "RETURNING...";
+
+  if (
+    typeof PortalsSdk === "undefined" ||
+    typeof PortalsSdk.sendMessageToUnity !== "function"
+  ) {
+    console.error(
+      "Portals SDK is unavailable."
+    );
+
+    button.textContent = "SDK ERROR";
+
+    window.setTimeout(
+      resetMainMenuButton,
+      1800
+    );
+
+    return;
+  }
+
+  try {
+    PortalsSdk.sendMessageToUnity(
+      JSON.stringify({
+        TaskName: "return to main menu",
+        TaskTargetState: "SetNotActiveToActive",
+        Delay: 0
+      })
+    );
+
+    if (
+      typeof PortalsSdk.closeIframe === "function"
+    ) {
+      PortalsSdk.closeIframe();
+    } else {
+      console.error(
+        "PortalsSdk.closeIframe is unavailable."
+      );
+
+      button.textContent = "CLOSE ERROR";
+
+      window.setTimeout(
+        resetMainMenuButton,
+        1800
+      );
+    }
+  } catch (error) {
+    console.error(
+      "Main Menu action failed:",
+      error
+    );
+
+    button.textContent = "TASK ERROR";
+
+    window.setTimeout(
+      resetMainMenuButton,
+      1800
+    );
+  }
+}
 
   window.addEventListener(
     "message",
