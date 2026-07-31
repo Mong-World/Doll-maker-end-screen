@@ -817,9 +817,13 @@ function returnToMainMenu() {
       },
       "*"
     );
+
+    console.log(
+      "Return-to-menu message sent to outer Portals iframe."
+    );
   } catch (error) {
     console.error(
-      "Could not contact the outer ending iframe:",
+      "Could not send message to outer iframe:",
       error
     );
 
@@ -831,7 +835,7 @@ function returnToMainMenu() {
     );
   }
 }
-
+  
   window.addEventListener(
     "message",
     (event) => {
