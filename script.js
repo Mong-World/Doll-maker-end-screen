@@ -1123,34 +1123,42 @@
     }
   }
 
-  function openCredits() {
-    persistEndingData();
+ function openCredits() {
+  persistEndingData();
 
-    const returnUrl =
-      window.location.href;
-
-    const creditsUrl =
-      new URL(
-        CONFIG.creditsUrl
-      );
-
-    creditsUrl.searchParams.set(
-      "return",
-      returnUrl
+  const returnUrl =
+    new URL(
+      "https://mong-world.github.io/Doll-maker-end-screen/"
     );
 
-    window.location.href =
-      creditsUrl.href;
-  }
-
-  window.addEventListener(
-    "message",
-    (event) => {
-      handleIncomingData(
-        event.data
-      );
-    }
+  returnUrl.searchParams.set(
+    "ending",
+    state.ending
   );
+
+  returnUrl.searchParams.set(
+    "letters",
+    String(getLetterTotal())
+  );
+
+  returnUrl.searchParams.set(
+    "build",
+    "24"
+  );
+
+  const creditsUrl =
+    new URL(
+      CONFIG.creditsUrl
+    );
+
+  creditsUrl.searchParams.set(
+    "return",
+    returnUrl.href
+  );
+
+  window.location.href =
+    creditsUrl.href;
+}
 
   window.addEventListener(
     "pageshow",
