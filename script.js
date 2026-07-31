@@ -51,7 +51,7 @@
       "return to main menu",
 
     iframeTaskName:
-      "test ending iframe"
+      "end screen"
   };
 
   const state = {
