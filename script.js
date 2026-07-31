@@ -791,6 +791,15 @@ function resetMainMenuButton() {
   elements.mainMenuButton.textContent = "MAIN MENU";
 }
 
+function resetMainMenuButton() {
+  if (!elements.mainMenuButton) {
+    return;
+  }
+
+  elements.mainMenuButton.disabled = false;
+  elements.mainMenuButton.textContent = "MAIN MENU";
+}
+
 function returnToMainMenu() {
   const button = elements.mainMenuButton;
 
@@ -801,56 +810,20 @@ function returnToMainMenu() {
   button.disabled = true;
   button.textContent = "RETURNING...";
 
-  if (
-    typeof PortalsSdk === "undefined" ||
-    typeof PortalsSdk.sendMessageToUnity !== "function"
-  ) {
-    console.error(
-      "Portals SDK is unavailable."
-    );
-
-    button.textContent = "SDK ERROR";
-
-    window.setTimeout(
-      resetMainMenuButton,
-      1800
-    );
-
-    return;
-  }
-
   try {
-    PortalsSdk.sendMessageToUnity(
-      JSON.stringify({
-        TaskName: "return to main menu",
-        TaskTargetState: "SetNotActiveToActive",
-        Delay: 0
-      })
+    window.parent.postMessage(
+      {
+        type: "doll-maker-return-main-menu"
+      },
+      "*"
     );
-
-    if (
-      typeof PortalsSdk.closeIframe === "function"
-    ) {
-      PortalsSdk.closeIframe();
-    } else {
-      console.error(
-        "PortalsSdk.closeIframe is unavailable."
-      );
-
-      button.textContent = "CLOSE ERROR";
-
-      window.setTimeout(
-        resetMainMenuButton,
-        1800
-      );
-    }
   } catch (error) {
     console.error(
-      "Main Menu action failed:",
+      "Could not contact the outer ending iframe:",
       error
     );
 
-    button.textContent = "TASK ERROR";
+    button.textContent = "RETURN ERROR";
 
     window.setTimeout(
       resetMainMenuButton,
