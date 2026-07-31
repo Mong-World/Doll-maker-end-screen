@@ -692,19 +692,43 @@
     );
   }
 
-  if (mainMenuButton) {
-    mainMenuButton.addEventListener(
-      "click",
-      () => {
-        mainMenuButton.disabled = true;
+ if (mainMenuButton) {
+  mainMenuButton.addEventListener(
+    "click",
+    () => {
+      mainMenuButton.disabled = true;
 
-        window.parent.postMessage(
-          {
-            type: "doll-maker-return-main-menu"
-          },
-          "*"
-        );
+      if (
+        typeof PortalsSdk === "undefined" ||
+        typeof PortalsSdk.sendMessageToUnity !== "function"
+      ) {
+        console.error("PortalsSdk is not available.");
+        mainMenuButton.disabled = false;
+        return;
       }
+
+      PortalsSdk.sendMessageToUnity(
+        JSON.stringify({
+          TaskName: "return to main menu",
+          TaskTargetState: "SetAnyToActive",
+          Delay: 0
+        })
+      );
+
+      if (
+        typeof PortalsSdk.closeIframe === "function"
+      ) {
+        PortalsSdk.closeIframe();
+      } else {
+        console.error(
+          "PortalsSdk.closeIframe is not available."
+        );
+
+        mainMenuButton.disabled = false;
+      }
+    }
+  );
+}
     );
   }
 })();
