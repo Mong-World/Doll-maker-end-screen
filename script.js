@@ -783,14 +783,9 @@
       return;
     }
 
-    state.returningToMenu =
-      false;
-
-    elements.mainMenuButton.disabled =
-      false;
-
-    elements.mainMenuButton.textContent =
-      "MAIN MENU";
+    state.returningToMenu = false;
+    elements.mainMenuButton.disabled = false;
+    elements.mainMenuButton.textContent = "MAIN MENU";
   }
 
   function showMainMenuError(message) {
@@ -800,8 +795,7 @@
       return;
     }
 
-    elements.mainMenuButton.textContent =
-      "ERROR";
+    elements.mainMenuButton.textContent = "ERROR";
 
     window.setTimeout(
       resetMainMenuButton,
@@ -812,29 +806,20 @@
   function sendPortalsTask(
     taskName,
     targetState,
-    delay
+    delay = 0
   ) {
     if (
-      typeof PortalsSdk ===
-        "undefined" ||
-      typeof PortalsSdk
-        .sendMessageToUnity !==
-        "function"
+      typeof PortalsSdk === "undefined" ||
+      typeof PortalsSdk.sendMessageToUnity !== "function"
     ) {
       return false;
     }
 
-    const message =
-      JSON.stringify({
-        TaskName:
-          taskName,
-
-        TaskTargetState:
-          targetState,
-
-        Delay:
-          delay
-      });
+    const message = JSON.stringify({
+      TaskName: taskName,
+      TaskTargetState: targetState,
+      Delay: delay
+    });
 
     console.log(
       "Sending Portals task:",
@@ -848,22 +833,18 @@
     return true;
   }
 
-    function resetMainMenuButton() {
-    if (!elements.mainMenuButton) {
-      return;
-    }
-
-    elements.mainMenuButton.disabled = false;
-    elements.mainMenuButton.textContent = "MAIN MENU";
-  }
-
   function returnToMainMenu() {
-    const button = elements.mainMenuButton;
+    const button =
+      elements.mainMenuButton;
 
-    if (!button) {
+    if (
+      !button ||
+      state.returningToMenu
+    ) {
       return;
     }
 
+    state.returningToMenu = true;
     button.disabled = true;
     button.textContent = "RETURNING...";
 
@@ -871,54 +852,74 @@
       typeof PortalsSdk === "undefined" ||
       typeof PortalsSdk.sendMessageToUnity !== "function"
     ) {
-      console.error(
-        "Portals SDK is unavailable. The page may not be running inside a Portals iframe."
-      );
-
-      button.textContent = "RETURN ERROR";
-
-      window.setTimeout(
-        resetMainMenuButton,
-        1800
+      showMainMenuError(
+        "Portals SDK is unavailable. The page must be opened using a Portals Iframe effect."
       );
 
       return;
     }
 
     try {
-      // Activate the Portals task that handles returning to the menu.
-      PortalsSdk.sendMessageToUnity({
-        command: "SetTask",
-        taskName: CONFIG.returnTaskName,
-        state: "Active"
-      });
+      // Activate the Portals task that returns the player
+      // to the game's main menu.
+      const returnTaskSent =
+        sendPortalsTask(
+          CONFIG.returnTaskName,
+          "SetNotActiveToActive",
+          0
+        );
 
-      // Mark the current ending-screen task as inactive.
-      PortalsSdk.sendMessageToUnity({
-        command: "SetTask",
-        taskName: CONFIG.endScreenTaskName,
-        state: "NotActive"
-      });
+      if (!returnTaskSent) {
+        showMainMenuError(
+          "Could not activate the return-to-main-menu task."
+        );
 
-      // Close the direct Portals iframe.
-      window.setTimeout(() => {
-        if (
-          typeof PortalsSdk.closeIframe === "function"
-        ) {
+        return;
+      }
+
+      // Set the task containing the ending iframe
+      // from Active back to Not Active.
+      const iframeTaskSent =
+        sendPortalsTask(
+          CONFIG.iframeTaskName,
+          "SetActiveToNotActive",
+          0
+        );
+
+      if (!iframeTaskSent) {
+        showMainMenuError(
+          "Could not reset the ending-screen task."
+        );
+
+        return;
+      }
+
+      if (
+        typeof PortalsSdk.closeIframe !== "function"
+      ) {
+        showMainMenuError(
+          "PortalsSdk.closeIframe is unavailable."
+        );
+
+        return;
+      }
+
+      // Give Portals a moment to process both task messages
+      // before closing the iframe.
+      window.setTimeout(
+        () => {
           PortalsSdk.closeIframe();
-        }
-      }, 150);
+        },
+        150
+      );
     } catch (error) {
       console.error(
-        "Could not return to the main menu:",
+        "Main Menu action failed:",
         error
       );
 
-      button.textContent = "RETURN ERROR";
-
-      window.setTimeout(
-        resetMainMenuButton,
-        1800
+      showMainMenuError(
+        "The Main Menu action failed."
       );
     }
   }
