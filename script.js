@@ -8,11 +8,13 @@
         artwork: "assets/ending_leftbehind.PNG",
         particleCount: 34
       },
+
       "exit stitch": {
         title: "ESCAPED",
         artwork: "assets/ending_escaped.PNG",
         particleCount: 48
       },
+
       "pendant ending": {
         title: "TRUE FRIENDSHIP",
         artwork: "assets/ending_truefriendship.PNG",
@@ -134,7 +136,9 @@
       "1",
       "2",
       "done"
-    ].includes(normaliseName(value));
+    ].includes(
+      normaliseName(value)
+    );
   }
 
   function resolveEnding(rawEnding) {
@@ -171,11 +175,15 @@
       endingName
     );
 
-    elements.endingTitle.textContent =
-      ending.title;
+    if (elements.endingTitle) {
+      elements.endingTitle.textContent =
+        ending.title;
+    }
 
-    elements.endingBackground.style.backgroundImage =
-      `url("${ending.artwork}")`;
+    if (elements.endingBackground) {
+      elements.endingBackground.style.backgroundImage =
+        `url("${ending.artwork}")`;
+    }
 
     document.title =
       `The Doll Maker — ${ending.title}`;
@@ -188,7 +196,8 @@
   }
 
   function setLetterCount(value) {
-    const number = Number(value);
+    const number =
+      Number(value);
 
     if (!Number.isFinite(number)) {
       return false;
@@ -225,6 +234,10 @@
   }
 
   function updateWallpaperUnlock(total) {
+    if (!elements.wallpaperButton) {
+      return;
+    }
+
     elements.wallpaperButton.hidden =
       total !== 6;
   }
@@ -236,11 +249,14 @@
     const normalisedTask =
       normaliseName(taskName);
 
+    const resolvedEnding =
+      resolveEnding(normalisedTask);
+
     if (
-      CONFIG.endings[normalisedTask] &&
+      resolvedEnding &&
       isCompleted(taskState)
     ) {
-      setEnding(normalisedTask);
+      setEnding(resolvedEnding);
     }
 
     if (
@@ -249,8 +265,12 @@
       ) &&
       isCompleted(taskState)
     ) {
-      state.numericLetterCount = null;
-      state.letters.add(normalisedTask);
+      state.numericLetterCount =
+        null;
+
+      state.letters.add(
+        normalisedTask
+      );
     }
   }
 
@@ -264,7 +284,11 @@
         if (
           typeof task === "string"
         ) {
-          registerTask(task, true);
+          registerTask(
+            task,
+            true
+          );
+
           return;
         }
 
@@ -330,7 +354,10 @@
       if (possibleEnding) {
         setEnding(possibleEnding);
       } else {
-        registerTask(data, true);
+        registerTask(
+          data,
+          true
+        );
       }
 
       maybeStartSequence();
@@ -418,6 +445,10 @@
   function createParticles(
     particleCount
   ) {
+    if (!elements.particles) {
+      return;
+    }
+
     elements.particles.innerHTML =
       "";
 
@@ -500,7 +531,14 @@
 
   function animateLetterCount(target) {
     return new Promise((resolve) => {
-      const duration = 1250;
+      if (!elements.letterCount) {
+        resolve();
+        return;
+      }
+
+      const duration =
+        1250;
+
       const startedAt =
         performance.now();
 
@@ -528,7 +566,9 @@
           `${value} / 6`;
 
         if (progress < 1) {
-          requestAnimationFrame(tick);
+          requestAnimationFrame(
+            tick
+          );
         } else {
           elements.letterCount.textContent =
             `${target} / 6`;
@@ -537,7 +577,9 @@
         }
       }
 
-      requestAnimationFrame(tick);
+      requestAnimationFrame(
+        tick
+      );
     });
   }
 
@@ -549,7 +591,8 @@
       return;
     }
 
-    state.sequenceStarted = true;
+    state.sequenceStarted =
+      true;
 
     const totalLetters =
       getLetterTotal();
@@ -558,20 +601,22 @@
       totalLetters
     );
 
-    elements.letterCount.textContent =
-      "0 / 6";
+    if (elements.letterCount) {
+      elements.letterCount.textContent =
+        "0 / 6";
+    }
 
-    elements.lettersMessage.classList.remove(
+    elements.lettersMessage?.classList.remove(
       "is-visible"
     );
 
     await wait(180);
 
-    elements.endingBackground.classList.add(
+    elements.endingBackground?.classList.add(
       "is-visible"
     );
 
-    elements.backgroundShade.classList.add(
+    elements.backgroundShade?.classList.add(
       "is-visible"
     );
 
@@ -583,13 +628,13 @@
       }
     );
 
-    elements.particles.classList.add(
+    elements.particles?.classList.add(
       "is-visible"
     );
 
     await wait(1150);
 
-    elements.endingTitle.classList.add(
+    elements.endingTitle?.classList.add(
       "is-visible"
     );
 
@@ -608,7 +653,7 @@
 
     await wait(850);
 
-    elements.lettersBlock.classList.add(
+    elements.lettersBlock?.classList.add(
       "is-visible"
     );
 
@@ -621,7 +666,7 @@
     if (totalLetters === 6) {
       await wait(250);
 
-      elements.lettersMessage.classList.add(
+      elements.lettersMessage?.classList.add(
         "is-visible"
       );
 
@@ -630,7 +675,7 @@
       await wait(350);
     }
 
-    elements.endingActions.classList.add(
+    elements.endingActions?.classList.add(
       "is-visible"
     );
   }
@@ -652,6 +697,13 @@
   }
 
   function showWallpaper() {
+    if (
+      !elements.wallpaperScreen ||
+      !elements.endingScreen
+    ) {
+      return;
+    }
+
     elements.wallpaperScreen.hidden =
       false;
 
@@ -660,28 +712,35 @@
       "true"
     );
 
-    elements.wallpaperPreview.classList.remove(
+    elements.wallpaperPreview?.classList.remove(
       "is-focused"
     );
 
-    elements.wallpaperControls.classList.remove(
+    elements.wallpaperControls?.classList.remove(
       "is-visible"
     );
 
     window.setTimeout(() => {
-      elements.wallpaperPreview.classList.add(
+      elements.wallpaperPreview?.classList.add(
         "is-focused"
       );
     }, 80);
 
     window.setTimeout(() => {
-      elements.wallpaperControls.classList.add(
+      elements.wallpaperControls?.classList.add(
         "is-visible"
       );
     }, 900);
   }
 
   function hideWallpaper() {
+    if (
+      !elements.wallpaperScreen ||
+      !elements.endingScreen
+    ) {
+      return;
+    }
+
     elements.wallpaperScreen.hidden =
       true;
 
@@ -692,97 +751,137 @@
 
   function setupPortalsMessageListener() {
     if (
-      typeof window.PortalsSdk !==
+      typeof PortalsSdk !==
         "undefined" &&
-      typeof window.PortalsSdk
+      typeof PortalsSdk
         .setMessageListener ===
         "function"
     ) {
-      window.PortalsSdk.setMessageListener(
+      PortalsSdk.setMessageListener(
         (message) => {
-          handleIncomingData(message);
+          handleIncomingData(
+            message
+          );
         }
       );
     }
   }
 
- function returnToMainMenu() {
-  const button = elements.mainMenuButton;
+  function resetMainMenuButton() {
+    if (!elements.mainMenuButton) {
+      return;
+    }
 
-  if (!button) {
-    return;
+    elements.mainMenuButton.disabled =
+      false;
+
+    elements.mainMenuButton.textContent =
+      "MAIN MENU";
   }
 
-  button.disabled = true;
-  button.textContent = "RETURNING...";
+  function returnToMainMenu() {
+    const button =
+      elements.mainMenuButton;
 
-  if (
-    typeof PortalsSdk === "undefined" ||
-    typeof PortalsSdk.sendMessageToUnity !== "function"
-  ) {
-    console.error("Portals SDK is unavailable.");
+    if (!button) {
+      return;
+    }
 
-    button.disabled = false;
-    button.textContent = "MAIN MENU";
-    return;
-  }
+    button.disabled =
+      true;
 
-  const message = JSON.stringify({
-    TaskName: "return to main menu",
-    TaskTargetState: "SetAnyToActive",
-    Delay: 0
-  });
+    button.textContent =
+      "RETURNING...";
 
-  console.log("Sending to Portals:", message);
-
-  try {
-    PortalsSdk.sendMessageToUnity(message);
-  } catch (error) {
-    console.error("Task message failed:", error);
-
-    button.disabled = false;
-    button.textContent = "MAIN MENU";
-    return;
-  }
-}
-  window.setTimeout(() => {
     if (
-      typeof PortalsSdk.closeIframe === "function"
+      typeof PortalsSdk ===
+        "undefined" ||
+      typeof PortalsSdk
+        .sendMessageToUnity !==
+        "function"
     ) {
-      try {
-        PortalsSdk.closeIframe();
-      } catch (error) {
-        console.error(
-          "Could not close iframe:",
-          error
-        );
-
-        button.disabled = false;
-        button.textContent = "MAIN MENU";
-      }
-    } else {
       console.error(
-        "PortalsSdk.closeIframe is unavailable."
+        "PortalsSdk is unavailable. " +
+        "Open this page through a Portals Iframe effect."
       );
 
-      button.disabled = false;
-      button.textContent = "MAIN MENU";
+      button.textContent =
+        "SDK ERROR";
+
+      window.setTimeout(
+        resetMainMenuButton,
+        1800
+      );
+
+      return;
     }
-  }, 300);
-}
+
+    const message =
+      JSON.stringify({
+        TaskName:
+          CONFIG.returnTaskName,
+
+        TaskTargetState:
+          "SetAnyToActive",
+
+        Delay:
+          0
+      });
+
+    console.log(
+      "Sending Portals task:",
+      message
+    );
+
+    try {
+      PortalsSdk.sendMessageToUnity(
+        message
+      );
+    } catch (error) {
+      console.error(
+        "Failed to send Portals task:",
+        error
+      );
+
+      button.textContent =
+        "TASK ERROR";
+
+      window.setTimeout(
+        resetMainMenuButton,
+        1800
+      );
+    }
+
+    /*
+     * Do not close the iframe here.
+     *
+     * The Active state of the Portals task
+     * "return to main menu" should contain
+     * the Close Iframe effect.
+     */
+  }
 
   window.addEventListener(
     "message",
     (event) => {
-      handleIncomingData(event.data);
+      handleIncomingData(
+        event.data
+      );
     }
   );
 
   window.DollMakerEnding = {
-    update: handleIncomingData,
-    setEnding,
-    setLetterCount,
-    registerTask
+    update:
+      handleIncomingData,
+
+    setEnding:
+      setEnding,
+
+    setLetterCount:
+      setLetterCount,
+
+    registerTask:
+      registerTask
   };
 
   elements.wallpaperButton?.addEventListener(
@@ -809,6 +908,8 @@
   );
 
   setupPortalsMessageListener();
+
   readQueryParameters();
+
   maybeStartSequence();
 })();
