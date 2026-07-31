@@ -706,57 +706,85 @@
     }
   }
 
-  function returnToMainMenu() {
-    const button =
-      elements.mainMenuButton;
+ function returnToMainMenu() {
+  const button = elements.mainMenuButton;
 
-    if (!button) {
-      return;
-    }
+  if (!button) {
+    return;
+  }
 
-    button.disabled = true;
-    button.textContent =
-      "RETURNING...";
+  button.disabled = true;
+  button.textContent = "RETURNING...";
 
+  if (
+    typeof PortalsSdk === "undefined" ||
+    typeof PortalsSdk.sendMessageToUnity !== "function"
+  ) {
+    console.error("The Portals SDK did not load.");
+
+    button.textContent = "SDK ERROR";
+
+    window.setTimeout(() => {
+      button.disabled = false;
+      button.textContent = "MAIN MENU";
+    }, 1500);
+
+    return;
+  }
+
+  const message = JSON.stringify({
+    TaskName: "return to main menu",
+    TaskTargetState: "SetAnyToActive",
+    Delay: 0
+  });
+
+  console.log(
+    "Sending Main Menu task:",
+    message
+  );
+
+  try {
+    PortalsSdk.sendMessageToUnity(message);
+  } catch (error) {
+    console.error(
+      "Could not activate Main Menu task:",
+      error
+    );
+
+    button.disabled = false;
+    button.textContent = "MAIN MENU";
+    return;
+  }
+
+  /*
+   * Give Portals a moment to receive the task message
+   * before the iframe is removed.
+   */
+  window.setTimeout(() => {
     if (
-      typeof window.PortalsSdk ===
-        "undefined" ||
-      typeof window.PortalsSdk
-        .sendMessageToUnity !==
-        "function"
+      typeof PortalsSdk.closeIframe === "function"
     ) {
+      try {
+        PortalsSdk.closeIframe();
+      } catch (error) {
+        console.error(
+          "Could not close iframe:",
+          error
+        );
+
+        button.disabled = false;
+        button.textContent = "MAIN MENU";
+      }
+    } else {
       console.error(
-        "PortalsSdk is unavailable. " +
-        "Open this page through a Portals Iframe effect."
+        "PortalsSdk.closeIframe is unavailable."
       );
 
       button.disabled = false;
-      button.textContent =
-        "MAIN MENU";
-
-      return;
+      button.textContent = "MAIN MENU";
     }
-
-    const message =
-      JSON.stringify({
-        TaskName:
-          CONFIG.returnTaskName,
-        TaskTargetState:
-          "SetNotActiveToActive",
-        Delay: 0
-      });
-
-    window.PortalsSdk
-      .sendMessageToUnity(message);
-
-    if (
-      typeof window.PortalsSdk
-        .closeIframe ===
-        "function"
-    ) {
-      window.PortalsSdk.closeIframe();
-    }
-  }
+  }, 300);
+}
 
   window.addEventListener(
     "message",
