@@ -848,88 +848,77 @@
     return true;
   }
 
-  function returnToMainMenu() {
-    const button =
-      elements.mainMenuButton;
-
-    if (
-      !button ||
-      state.returningToMenu
-    ) {
+    function resetMainMenuButton() {
+    if (!elements.mainMenuButton) {
       return;
     }
 
-    state.returningToMenu =
-      true;
+    elements.mainMenuButton.disabled = false;
+    elements.mainMenuButton.textContent = "MAIN MENU";
+  }
 
-    button.disabled =
-      true;
+  function returnToMainMenu() {
+    const button = elements.mainMenuButton;
 
-    button.textContent =
-      "RETURNING...";
+    if (!button) {
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "RETURNING...";
 
     if (
-      typeof PortalsSdk ===
-        "undefined"
+      typeof PortalsSdk === "undefined" ||
+      typeof PortalsSdk.sendMessageToUnity !== "function"
     ) {
-      showMainMenuError(
-        "PortalsSdk is unavailable. The page must be opened using a Portals Iframe effect."
+      console.error(
+        "Portals SDK is unavailable. The page may not be running inside a Portals iframe."
+      );
+
+      button.textContent = "RETURN ERROR";
+
+      window.setTimeout(
+        resetMainMenuButton,
+        1800
       );
 
       return;
     }
 
     try {
-      const returnTaskSent =
-        sendPortalsTask(
-          CONFIG.returnTaskName,
-          "SetNotActiveToActive",
-          0
-        );
+      // Activate the Portals task that handles returning to the menu.
+      PortalsSdk.sendMessageToUnity({
+        command: "SetTask",
+        taskName: CONFIG.returnTaskName,
+        state: "Active"
+      });
 
-      if (!returnTaskSent) {
-        showMainMenuError(
-          "Could not activate the return-to-main-menu task."
-        );
+      // Mark the current ending-screen task as inactive.
+      PortalsSdk.sendMessageToUnity({
+        command: "SetTask",
+        taskName: CONFIG.endScreenTaskName,
+        state: "NotActive"
+      });
 
-        return;
-      }
-
-      const iframeTaskSent =
-        sendPortalsTask(
-          CONFIG.iframeTaskName,
-          "SetActiveToNotActive",
-          0
-        );
-
-      if (!iframeTaskSent) {
-        showMainMenuError(
-          "Could not reset the iframe task."
-        );
-
-        return;
-      }
-
-      if (
-        typeof PortalsSdk.closeIframe !==
-          "function"
-      ) {
-        showMainMenuError(
-          "PortalsSdk.closeIframe is unavailable."
-        );
-
-        return;
-      }
-
-      PortalsSdk.closeIframe();
+      // Close the direct Portals iframe.
+      window.setTimeout(() => {
+        if (
+          typeof PortalsSdk.closeIframe === "function"
+        ) {
+          PortalsSdk.closeIframe();
+        }
+      }, 150);
     } catch (error) {
       console.error(
-        "Main Menu action failed:",
+        "Could not return to the main menu:",
         error
       );
 
-      showMainMenuError(
-        "The Main Menu action failed."
+      button.textContent = "RETURN ERROR";
+
+      window.setTimeout(
+        resetMainMenuButton,
+        1800
       );
     }
   }
