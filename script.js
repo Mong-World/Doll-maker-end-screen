@@ -659,4 +659,13 @@ await wait(850);
   readPreviewQueryParameters();
 
   runSequence();
+
+  const creditsButton = document.getElementById("creditsButton");
+
+if (creditsButton) {
+  creditsButton.addEventListener("click", () => {
+    window.location.href =
+      "https://mong-world.github.io/Doll-maker-credits/";
+  });
+}
 })();
