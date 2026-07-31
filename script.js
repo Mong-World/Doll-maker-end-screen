@@ -32,6 +32,14 @@
     ]
   };
 
+  const ENDING_ALIASES = {
+    leftbehind: "exit solo",
+    "left behind": "exit solo",
+    escaped: "exit stitch",
+    truefriendship: "pendant ending",
+    "true friendship": "pendant ending"
+  };
+
   const state = {
     ending: "exit solo",
     letters: new Set(),
@@ -112,8 +120,12 @@
   }
 
   function setEnding(rawEnding) {
-    const endingName =
+    const receivedEnding =
       normaliseName(rawEnding);
+
+    const endingName =
+      ENDING_ALIASES[receivedEnding] ??
+      receivedEnding;
 
     const ending =
       CONFIG.endings[endingName];
@@ -549,17 +561,17 @@
 
     await wait(1150);
 
-   elements.endingTitle.classList.add(
-  "is-visible"
-);
+    elements.endingTitle.classList.add(
+      "is-visible"
+    );
 
-if (state.ending === "pendant ending") {
-  document
-    .querySelector(".ending-content")
-    .classList.add("has-text-fog");
-}
+    if (state.ending === "pendant ending") {
+      document
+        .querySelector(".ending-content")
+        .classList.add("has-text-fog");
+    }
 
-await wait(850);
+    await wait(850);
 
     elements.lettersBlock.classList.add(
       "is-visible"
@@ -642,15 +654,19 @@ await wait(850);
     registerTask
   };
 
-  elements.wallpaperButton.addEventListener(
-    "click",
-    showWallpaper
-  );
+  if (elements.wallpaperButton) {
+    elements.wallpaperButton.addEventListener(
+      "click",
+      showWallpaper
+    );
+  }
 
-  elements.wallpaperBackButton.addEventListener(
-    "click",
-    hideWallpaper
-  );
+  if (elements.wallpaperBackButton) {
+    elements.wallpaperBackButton.addEventListener(
+      "click",
+      hideWallpaper
+    );
+  }
 
   setEnding(
     state.ending
@@ -660,12 +676,35 @@ await wait(850);
 
   runSequence();
 
-  const creditsButton = document.getElementById("creditsButton");
+  const creditsButton =
+    document.getElementById("creditsButton");
 
-if (creditsButton) {
-  creditsButton.addEventListener("click", () => {
-    window.location.href =
-      "https://mong-world.github.io/Doll-maker-credits/";
-  });
-}
+  const mainMenuButton =
+    document.getElementById("mainMenuButton");
+
+  if (creditsButton) {
+    creditsButton.addEventListener(
+      "click",
+      () => {
+        window.location.href =
+          "https://mong-world.github.io/Doll-maker-credits/";
+      }
+    );
+  }
+
+  if (mainMenuButton) {
+    mainMenuButton.addEventListener(
+      "click",
+      () => {
+        mainMenuButton.disabled = true;
+
+        window.parent.postMessage(
+          {
+            type: "doll-maker-return-main-menu"
+          },
+          "*"
+        );
+      }
+    );
+  }
 })();
