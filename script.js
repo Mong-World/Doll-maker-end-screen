@@ -50,15 +50,16 @@
     returnTaskName:
       "return to main menu",
 
-    endScreenTaskName:
-      "end screen"
+    iframeTaskName:
+      "test ending iframe"
   };
 
   const state = {
     ending: null,
     letters: new Set(),
     numericLetterCount: null,
-    sequenceStarted: false
+    sequenceStarted: false,
+    returningToMenu: false
   };
 
   const elements = {
@@ -760,13 +761,20 @@
         .setMessageListener ===
         "function"
     ) {
-      PortalsSdk.setMessageListener(
-        (message) => {
-          handleIncomingData(
-            message
-          );
-        }
-      );
+      try {
+        PortalsSdk.setMessageListener(
+          (message) => {
+            handleIncomingData(
+              message
+            );
+          }
+        );
+      } catch (error) {
+        console.warn(
+          "Could not set Portals message listener:",
+          error
+        );
+      }
     }
   }
 
@@ -775,6 +783,9 @@
       return;
     }
 
+    state.returningToMenu =
+      false;
+
     elements.mainMenuButton.disabled =
       false;
 
@@ -782,60 +793,147 @@
       "MAIN MENU";
   }
 
-function resetMainMenuButton() {
-  if (!elements.mainMenuButton) {
-    return;
-  }
+  function showMainMenuError(message) {
+    console.error(message);
 
-  elements.mainMenuButton.disabled = false;
-  elements.mainMenuButton.textContent = "MAIN MENU";
-}
+    if (!elements.mainMenuButton) {
+      return;
+    }
 
-function resetMainMenuButton() {
-  if (!elements.mainMenuButton) {
-    return;
-  }
-
-  elements.mainMenuButton.disabled = false;
-  elements.mainMenuButton.textContent = "MAIN MENU";
-}
-
-function returnToMainMenu() {
-  const button = elements.mainMenuButton;
-
-  if (!button) {
-    return;
-  }
-
-  button.disabled = true;
-  button.textContent = "RETURNING...";
-
-  try {
-    window.parent.postMessage(
-      {
-        type: "doll-maker-return-main-menu"
-      },
-      "*"
-    );
-
-    console.log(
-      "Return-to-menu message sent to outer Portals iframe."
-    );
-  } catch (error) {
-    console.error(
-      "Could not send message to outer iframe:",
-      error
-    );
-
-    button.textContent = "RETURN ERROR";
+    elements.mainMenuButton.textContent =
+      "ERROR";
 
     window.setTimeout(
       resetMainMenuButton,
       1800
     );
   }
-}
-  
+
+  function sendPortalsTask(
+    taskName,
+    targetState,
+    delay
+  ) {
+    if (
+      typeof PortalsSdk ===
+        "undefined" ||
+      typeof PortalsSdk
+        .sendMessageToUnity !==
+        "function"
+    ) {
+      return false;
+    }
+
+    const message =
+      JSON.stringify({
+        TaskName:
+          taskName,
+
+        TaskTargetState:
+          targetState,
+
+        Delay:
+          delay
+      });
+
+    console.log(
+      "Sending Portals task:",
+      message
+    );
+
+    PortalsSdk.sendMessageToUnity(
+      message
+    );
+
+    return true;
+  }
+
+  function returnToMainMenu() {
+    const button =
+      elements.mainMenuButton;
+
+    if (
+      !button ||
+      state.returningToMenu
+    ) {
+      return;
+    }
+
+    state.returningToMenu =
+      true;
+
+    button.disabled =
+      true;
+
+    button.textContent =
+      "RETURNING...";
+
+    if (
+      typeof PortalsSdk ===
+        "undefined"
+    ) {
+      showMainMenuError(
+        "PortalsSdk is unavailable. The page must be opened using a Portals Iframe effect."
+      );
+
+      return;
+    }
+
+    try {
+      const returnTaskSent =
+        sendPortalsTask(
+          CONFIG.returnTaskName,
+          "SetNotActiveToActive",
+          0
+        );
+
+      if (!returnTaskSent) {
+        showMainMenuError(
+          "Could not activate the return-to-main-menu task."
+        );
+
+        return;
+      }
+
+      const iframeTaskSent =
+        sendPortalsTask(
+          CONFIG.iframeTaskName,
+          "SetActiveToNotActive",
+          0
+        );
+
+      if (!iframeTaskSent) {
+        showMainMenuError(
+          "Could not reset the iframe task."
+        );
+
+        return;
+      }
+
+      if (
+        typeof PortalsSdk.closeIframe !==
+          "function"
+      ) {
+        showMainMenuError(
+          "PortalsSdk.closeIframe is unavailable."
+        );
+
+        return;
+      }
+
+      PortalsSdk.closeIframe();
+    } catch (error) {
+      console.error(
+        "Main Menu action failed:",
+        error
+      );
+
+      showMainMenuError(
+        "The Main Menu action failed."
+      );
+    }
+  }
+
   window.addEventListener(
     "message",
     (event) => {
