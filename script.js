@@ -720,15 +720,10 @@
     typeof PortalsSdk === "undefined" ||
     typeof PortalsSdk.sendMessageToUnity !== "function"
   ) {
-    console.error("The Portals SDK did not load.");
+    console.error("Portals SDK is unavailable.");
 
-    button.textContent = "SDK ERROR";
-
-    window.setTimeout(() => {
-      button.disabled = false;
-      button.textContent = "MAIN MENU";
-    }, 1500);
-
+    button.disabled = false;
+    button.textContent = "MAIN MENU";
     return;
   }
 
@@ -738,28 +733,18 @@
     Delay: 0
   });
 
-  console.log(
-    "Sending Main Menu task:",
-    message
-  );
+  console.log("Sending to Portals:", message);
 
   try {
     PortalsSdk.sendMessageToUnity(message);
   } catch (error) {
-    console.error(
-      "Could not activate Main Menu task:",
-      error
-    );
+    console.error("Task message failed:", error);
 
     button.disabled = false;
     button.textContent = "MAIN MENU";
     return;
   }
-
-  /*
-   * Give Portals a moment to receive the task message
-   * before the iframe is removed.
-   */
+}
   window.setTimeout(() => {
     if (
       typeof PortalsSdk.closeIframe === "function"
