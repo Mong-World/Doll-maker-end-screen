@@ -48,7 +48,10 @@
       "https://mong-world.github.io/Doll-maker-credits/",
 
     returnTaskName:
-      "return to main menu"
+      "return to main menu",
+
+    endScreenTaskName:
+      "end screen"
   };
 
   const state = {
@@ -795,14 +798,10 @@
 
     if (
       typeof PortalsSdk ===
-        "undefined" ||
-      typeof PortalsSdk
-        .sendMessageToUnity !==
-        "function"
+      "undefined"
     ) {
       console.error(
-        "PortalsSdk is unavailable. " +
-        "Open this page through a Portals Iframe effect."
+        "PortalsSdk is unavailable."
       );
 
       button.textContent =
@@ -816,30 +815,71 @@
       return;
     }
 
-    const message =
+    if (
+      typeof PortalsSdk
+        .sendMessageToUnity !==
+        "function"
+    ) {
+      console.error(
+        "sendMessageToUnity is unavailable."
+      );
+
+      button.textContent =
+        "SDK ERROR";
+
+      window.setTimeout(
+        resetMainMenuButton,
+        1800
+      );
+
+      return;
+    }
+
+    const activateMainMenuTask =
       JSON.stringify({
         TaskName:
           CONFIG.returnTaskName,
 
         TaskTargetState:
-          "SetAnyToActive",
+          "SetNotActiveToActive",
 
         Delay:
           0
       });
 
+    const resetEndScreenTask =
+      JSON.stringify({
+        TaskName:
+          CONFIG.endScreenTaskName,
+
+        TaskTargetState:
+          "SetActiveToNotActive",
+
+        Delay:
+          0.1
+      });
+
     console.log(
-      "Sending Portals task:",
-      message
+      "Activating return task:",
+      activateMainMenuTask
+    );
+
+    console.log(
+      "Resetting end screen task:",
+      resetEndScreenTask
     );
 
     try {
       PortalsSdk.sendMessageToUnity(
-        message
+        activateMainMenuTask
+      );
+
+      PortalsSdk.sendMessageToUnity(
+        resetEndScreenTask
       );
     } catch (error) {
       console.error(
-        "Failed to send Portals task:",
+        "Failed to send Portals task messages:",
         error
       );
 
@@ -850,15 +890,46 @@
         resetMainMenuButton,
         1800
       );
+
+      return;
     }
 
-    /*
-     * Do not close the iframe here.
-     *
-     * The Active state of the Portals task
-     * "return to main menu" should contain
-     * the Close Iframe effect.
-     */
+    window.setTimeout(() => {
+      if (
+        typeof PortalsSdk
+          .closeIframe ===
+          "function"
+      ) {
+        try {
+          PortalsSdk.closeIframe();
+        } catch (error) {
+          console.error(
+            "Failed to close iframe:",
+            error
+          );
+
+          button.textContent =
+            "CLOSE ERROR";
+
+          window.setTimeout(
+            resetMainMenuButton,
+            1800
+          );
+        }
+      } else {
+        console.error(
+          "closeIframe is unavailable."
+        );
+
+        button.textContent =
+          "CLOSE ERROR";
+
+        window.setTimeout(
+          resetMainMenuButton,
+          1800
+        );
+      }
+    }, 300);
   }
 
   window.addEventListener(
