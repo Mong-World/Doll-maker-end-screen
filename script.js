@@ -860,94 +860,133 @@
   }
 
   function returnToMainMenu() {
-    const button =
-      elements.mainMenuButton;
+  const button =
+    elements.mainMenuButton;
 
-    if (
-      !button ||
-      state.returningToMenu
-    ) {
+  if (
+    !button ||
+    state.returningToMenu
+  ) {
+    return;
+  }
+
+  state.returningToMenu =
+    true;
+
+  button.disabled =
+    true;
+
+  button.textContent =
+    "RETURNING...";
+
+  try {
+    /*
+     * Activate the Portals task that handles
+     * returning the player to the main menu.
+     */
+    const returnTaskSent =
+      sendPortalsTask(
+        CONFIG.returnTaskName,
+        "SetNotActiveToActive",
+        0
+      );
+
+    if (!returnTaskSent) {
+      showMainMenuError(
+        "Could not activate the return-to-main-menu task. The Portals SDK may be unavailable."
+      );
+
       return;
     }
 
-    state.returningToMenu =
-      true;
-
-    button.disabled =
-      true;
-
-    button.textContent =
-      "RETURNING...";
-
-    try {
-      const returnTaskSent =
-        sendPortalsTask(
-          CONFIG.returnTaskName,
-          "SetNotActiveToActive",
-          0
-        );
-
-      if (!returnTaskSent) {
-        showMainMenuError(
-          "Could not activate the return-to-main-menu task. The Portals SDK may be unavailable."
-        );
-
-        return;
-      }
-
-      const iframeTaskSent =
-        sendPortalsTask(
-          CONFIG.iframeTaskName,
-          "SetActiveToNotActive",
-          0.1
-        );
-
-      if (!iframeTaskSent) {
-        showMainMenuError(
-          "Could not deactivate the ending-screen task."
-        );
-
-        return;
-      }
-
-      if (
-        typeof PortalsSdk.closeIframe !==
-          "function"
-      ) {
-        showMainMenuError(
-          "PortalsSdk.closeIframe is unavailable."
-        );
-
-        return;
-      }
-
-      window.setTimeout(
-        () => {
-          PortalsSdk.closeIframe();
-        },
-        250
+    /*
+     * Delay deactivating the task that owns the iframe.
+     * This gives closeIframe time to run while the
+     * iframe's Portals connection is still active.
+     */
+    const iframeTaskSent =
+      sendPortalsTask(
+        CONFIG.iframeTaskName,
+        "SetActiveToNotActive",
+        1
       );
 
-      /*
-       * Portals may preserve the iframe page in memory.
-       * This safety reset prevents a later ending from
-       * reopening with a disabled RETURNING button.
-       */
-      window.setTimeout(
-        resetMainMenuButton,
-        1000
-      );
-    } catch (error) {
-      console.error(
-        "Main Menu action failed:",
-        error
-      );
-
+    if (!iframeTaskSent) {
       showMainMenuError(
-        "The Main Menu action failed."
+        "Could not schedule the ending-screen task to deactivate."
       );
+
+      return;
     }
+
+    if (
+      typeof PortalsSdk ===
+        "undefined" ||
+      typeof PortalsSdk.closeIframe !==
+        "function"
+    ) {
+      showMainMenuError(
+        "PortalsSdk.closeIframe is unavailable."
+      );
+
+      return;
+    }
+
+    /*
+     * Close quickly, before Portals deactivates
+     * the task that owns this iframe.
+     */
+    window.setTimeout(
+      () => {
+        try {
+          PortalsSdk.closeIframe();
+        } catch (error) {
+          console.error(
+            "First iframe close attempt failed:",
+            error
+          );
+        }
+      },
+      50
+    );
+
+    /*
+     * A second attempt provides a small fallback
+     * if the first SDK call is missed.
+     */
+    window.setTimeout(
+      () => {
+        try {
+          PortalsSdk.closeIframe();
+        } catch (error) {
+          console.error(
+            "Second iframe close attempt failed:",
+            error
+          );
+        }
+      },
+      250
+    );
+
+    /*
+     * Portals can preserve the page in memory.
+     * Reset the button so it is usable next time.
+     */
+    window.setTimeout(
+      resetMainMenuButton,
+      1500
+    );
+  } catch (error) {
+    console.error(
+      "Main Menu action failed:",
+      error
+    );
+
+    showMainMenuError(
+      "The Main Menu action failed."
+    );
   }
+}
 
   function openCredits() {
     const returnUrl =
